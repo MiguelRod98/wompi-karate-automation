@@ -1,0 +1,15 @@
+# Wompi API Keys Configuration
+# Copy this file to 'karate.properties' and update with your keys
+# The karate.properties file is gitignored for security
+
+# Public Key
+#wompi.publicKey=pub_stagtest_YOUR_KEY_HERE
+
+# Private Key
+#wompi.privateKey=prv_stagtest_YOUR_KEY_HERE
+
+# Integrity Key
+#wompi.integrityKey=stagtest_integrity_YOUR_KEY_HERE
+
+# Events Key
+#wompi.eventsKey=stagtest_events_YOUR_KEY_HERE

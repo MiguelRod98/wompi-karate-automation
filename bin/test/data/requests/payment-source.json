@@ -1,0 +1,8 @@
+{
+  "createPaymentSource": {
+    "type": "",
+    "token": "",
+    "customer_email": "",
+    "acceptance_token": ""
+  }
+}

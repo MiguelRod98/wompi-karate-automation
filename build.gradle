@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.wompi.automation'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'com.intuit.karate:karate-junit5:1.4.1'
+    testImplementation 'com.intuit.karate:karate-apache:0.9.6'
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty "karate.options", System.properties.getProperty("karate.options")
+    systemProperty "karate.env", System.properties.getProperty("karate.env", "sandbox")
+    outputs.upToDateWhen { false }
+    maxParallelForks = 1
+    forkEvery = 1
+}

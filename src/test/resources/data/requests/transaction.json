@@ -1,0 +1,15 @@
+{
+  "createTransaction": {
+    "amount_in_cents": 0,
+    "currency": "",
+    "customer_email": "",
+    "acceptance_token": "",
+    "signature": "",
+    "payment_method": {
+      "type": "",
+      "phone_number": "",
+      "payment_source_id": ""
+    },
+    "reference": ""
+  }
+}
