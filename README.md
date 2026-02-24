@@ -1,65 +1,104 @@
 # Wompi Karate Automation Framework
 
 ## Descripcion
-Automatizacion de pruebas de integracion API para Wompi usando Karate Framework con Java LTS, Gradle y estilo BDD.
+Automatizacion de pruebas de integracion API para Wompi usando Karate Framework, Java 21 (LTS), Gradle y enfoque BDD.
 
-## Cumplimiento de la Prueba Tecnica
-1. Escenarios basicos y alternos:
-   - 3 positivos: transaccion exitosa, transaccion con monto distinto, consulta por ID.
-   - 3 negativos: monto invalido, telefono invalido, transaccion inexistente.
-2. Script funcional de integracion API:
-   - Flujo completo NEQUI: acceptance token -> payment source -> transaction -> consulta.
-3. Metodo de pago escogido:
-   - NEQUI (no tarjeta de credito).
-4. Patron de diseno:
-   - Service Object Pattern para desacoplar features de llamadas HTTP.
-5. Arquitectura relacionada al patron:
-   - `features/` consume `services/` por `call read(...)`.
-6. Presentacion Review:
-   - Documento en `PRESENTACION_REVIEW.md`.
-7. Requisitos base:
-   - Java 21 (LTS) y BDD con Karate/Gherkin.
+## Estado actual
+Metodo de pago automatizado:
+1. NEQUI (sin tarjeta de credito).
 
-## Arquitectura
+Cobertura en `nequi-transactions.feature`:
+1. 4 escenarios positivos.
+2. 5 escenarios negativos.
+
+Escenarios positivos:
+1. Transaccion exitosa con NEQUI.
+2. Transaccion con monto valido diferente.
+3. Transaccion con monto minimo valido (`150000` cents).
+4. Consulta de transaccion por ID.
+
+Escenarios negativos:
+1. Creacion de transaccion con monto invalido.
+2. Creacion de transaccion con firma invalida.
+3. Creacion de token NEQUI con telefono invalido.
+4. Creacion de transaccion con autorizacion invalida.
+5. Consulta de transaccion inexistente.
+
+## Patron y arquitectura
 Patron aplicado: **Service Object Pattern**.
 
+Separacion principal:
+1. `features/` contiene el flujo de negocio legible.
+2. `services/` encapsula logica HTTP y contratos de respuesta.
+3. `data/requests/` centraliza plantillas JSON.
+4. `runners/` define puntos de ejecucion JUnit5.
+
+Estructura del proyecto (estilo arquitectura):
+
 ```text
-src/test/
-  java/com/wompi/automation/runners/
-    features/NequiTransactionsRunner.java
-    services/AcceptanceTokenServiceRunner.java
-    services/PaymentSourceServiceRunner.java
-    services/TransactionServiceRunner.java
-  resources/
-    setup.feature
-    karate-config.js
-    features/nequi-transactions.feature
-    services/acceptance-token-service.feature
-    services/payment-source-service.feature
-    services/transaction-service.feature
-    data/requests/payment-source.json
-    data/requests/transaction.json
+wompi-karate-automation/
+|-- .github/
+|   \-- workflows/
+|       \-- ci.yml                                # CI: smoke first, luego resto
+|-- src/
+|   \-- test/
+|       |-- java/com/wompi/automation/runners/
+|       |   |-- features/
+|       |   |   \-- NequiTransactionsRunner.java # Runner principal por tags
+|       |   \-- services/
+|       |       |-- AcceptanceTokenServiceRunner.java
+|       |       |-- PaymentSourceServiceRunner.java
+|       |       \-- TransactionServiceRunner.java
+|       \-- resources/
+|           |-- karate-config.js                  # Ambientes, llaves y endpoints
+|           |-- setup.feature                     # Utilidades compartidas
+|           |-- features/
+|           |   \-- nequi-transactions.feature   # Escenarios de negocio
+|           |-- services/
+|           |   |-- acceptance-token-service.feature
+|           |   |-- payment-source-service.feature
+|           |   \-- transaction-service.feature
+|           \-- data/requests/
+|               |-- payment-source.json
+|               \-- transaction.json
+|-- build.gradle
+|-- run-tests.bat
+\-- README.md
 ```
 
-## Estrategia de Estabilidad
-1. Reutilizacion de `paymentSourceId` por ejecucion de feature:
-   - `callonce` en `features/nequi-transactions.feature`.
-2. Reintentos en operaciones asincronas:
-   - `retry until` para creacion de `payment_sources` y `transactions`.
-3. Polling explicito de estado del token Nequi:
-   - `GET /tokens/nequi/{id}` hasta `APPROVED` antes de crear `payment_source`.
-4. Parametrizacion de servicios:
-   - `transaction-service.feature@createTransaction` acepta `paymentSourceId` y `amount`.
+Flujo funcional principal:
+1. Obtener acceptance token.
+2. Crear token NEQUI.
+3. Esperar aprobacion del token.
+4. Crear payment source.
+5. Crear transaccion.
+6. Consultar transaccion.
 
-## Ejecucion
+## Buenas practicas implementadas
+1. `callonce` para reutilizar `paymentSourceId` por ejecucion de feature.
+2. `retry until` en operaciones asincronas (`payment_sources` y `transactions`).
+3. Polling de token NEQUI hasta estado `APPROVED`.
+4. Reutilizacion de armado de request de transaccion con `@buildTransactionRequest`.
+5. Validacion de contrato en errores (`error.type`, `reason`, `messages`).
+6. Aserciones de tipo (`#string`, `#[]`) en lugar de aserciones debiles.
+
+## CI/CD (GitHub Actions)
+Workflow: `.github/workflows/ci.yml`.
+
+Orden de ejecucion en CI:
+1. Smoke tests primero (`NequiTransactionsRunner.smoke`).
+2. Si smoke pasa, se ejecuta el resto (`testNequiTransactions`) excluyendo `@smoke`.
+3. Siempre se suben artifacts de Karate y JUnit.
+
+## Ejecucion local
 Prerequisitos:
-1. Java 21
-2. Gradle Wrapper (`gradlew.bat`)
+1. Java 21.
+2. Gradle Wrapper (`gradlew` / `gradlew.bat`).
 
 Comandos:
 
 ```bash
-# Windows PowerShell
+# Ejecutar todo
 .\gradlew.bat test
 
 # Runner principal del feature
@@ -78,15 +117,15 @@ Comandos:
 .\gradlew.bat test -Dkarate.env=sandbox
 ```
 
-## Ambientes y Llaves
-Configurados en `src/test/resources/karate-config.js`.
+## Ambientes y llaves
+Definidos en `src/test/resources/karate-config.js`.
 
 1. UAT: `https://api.co.uat.wompi.dev/v1`
 2. Sandbox: `https://api-sandbox.co.uat.wompi.dev/v1`
 
 ## Reportes
-Karate genera reportes HTML en:
-1. `build/karate-reports/`
+1. Karate HTML: `build/karate-reports/`
+2. JUnit XML: `build/test-results/test/`
 
 ## Referencias
 1. https://docs.wompi.co/docs/colombia/inicio-rapido/

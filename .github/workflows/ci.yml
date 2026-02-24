@@ -24,8 +24,11 @@ jobs:
       - name: Grant execute permission to Gradle wrapper
         run: chmod +x gradlew
 
-      - name: Run tests
-        run: ./gradlew clean test --tests com.wompi.automation.runners.features.NequiTransactionsRunner --no-daemon --console=plain --info -Dkarate.env=sandbox
+      - name: Run smoke tests first
+        run: ./gradlew clean test --tests com.wompi.automation.runners.features.NequiTransactionsRunner.smoke --no-daemon --console=plain --info -Dkarate.env=sandbox
+
+      - name: Run remaining tests
+        run: ./gradlew test --tests com.wompi.automation.runners.features.NequiTransactionsRunner.testNequiTransactions --no-daemon --console=plain --info -Dkarate.env=sandbox -Dkarate.options="--tags ~@smoke"
 
       - name: Upload Karate reports
         if: always()

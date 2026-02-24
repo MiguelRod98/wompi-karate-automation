@@ -34,7 +34,8 @@ Feature: Payment Source Service
   Scenario: Get Nequi Token with Invalid Phone
     * def phoneNumber = '123'
     * def expectedStatus = 422
-    * call read('classpath:services/payment-source-service.feature@GetNequiToken')
+    * def invalidPhoneResult = call read('classpath:services/payment-source-service.feature@GetNequiToken')
+    * match invalidPhoneResult.response == { error: { type: 'UNPROCESSABLE', reason: '#string' } }
 
   @CreatePaymentSource
   Scenario: Create Payment Source
@@ -45,7 +46,7 @@ Feature: Payment Source Service
     * def phoneNumber = approvedPhone
     * def paymentType = 'NEQUI'
     
-    * def nequiTokenResult = call read('classpath:services/payment-source-service.feature@GetNequiToken')
+    * def nequiTokenResult = call read('classpath:services/payment-source-service.feature@GetNequiToken') { phoneNumber: '#(phoneNumber)', expectedStatus: 200 }
     * def nequiToken = nequiTokenResult.nequiToken
     * call read('classpath:services/payment-source-service.feature@WaitNequiTokenApproved') { tokenId: '#(nequiToken)' }
     

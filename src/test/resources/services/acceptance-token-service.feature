@@ -10,8 +10,6 @@ Feature: Acceptance Token Service
     Then status 200
     * def acceptanceToken = response.data.presigned_acceptance.acceptance_token
     * def personalDataAuthToken = response.data.presigned_personal_data_auth.acceptance_token
-    * print 'Acceptance Token:', acceptanceToken
-    * print 'Personal Data Auth Token:', personalDataAuthToken
     And match acceptanceToken == '#string'
     And match personalDataAuthToken == '#string'
     * def merchantEmail = response.data.email
