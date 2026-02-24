@@ -43,5 +43,3 @@ Feature: Payment Source Service
     Then status 201
     * print 'Payment Source ID:', response.data.id
     * def paymentSourceId = response.data.id
-    
-    * sleep(20)

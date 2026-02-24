@@ -25,7 +25,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests
-        run: ./gradlew clean test --tests com.wompi.automation.runners.features.NequiTransactionsRunner --no-daemon -Dkarate.env=sandbox
+        run: ./gradlew clean test --tests com.wompi.automation.runners.features.NequiTransactionsRunner --no-daemon --console=plain --info -Dkarate.env=sandbox
 
       - name: Upload Karate reports
         if: always()

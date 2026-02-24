@@ -5,20 +5,33 @@ plugins {
 group = 'com.wompi.automation'
 version = '1.0.0'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 repositories {
     mavenCentral()
 }
 
+def karateVersion = '1.4.1'
+
 dependencies {
-    testImplementation 'com.intuit.karate:karate-junit5:1.4.1'
-    testImplementation 'com.intuit.karate:karate-apache:0.9.6'
+    testImplementation "com.intuit.karate:karate-junit5:${karateVersion}"
 }
 
 test {
     useJUnitPlatform()
-    systemProperty "karate.options", System.properties.getProperty("karate.options")
-    systemProperty "karate.env", System.properties.getProperty("karate.env", "sandbox")
+    def karateOptions = System.getProperty("karate.options")
+    if (karateOptions) {
+        systemProperty "karate.options", karateOptions
+    }
+    systemProperty "karate.env", System.getProperty("karate.env", "sandbox")
     outputs.upToDateWhen { false }
-    maxParallelForks = 1
-    forkEvery = 1
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        showStandardStreams = true
+        exceptionFormat "full"
+    }
 }

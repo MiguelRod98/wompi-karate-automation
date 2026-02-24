@@ -8,4 +8,3 @@ Feature: Setup utilities for test execution
     * def approvedPhone = '3991111111'
     * def declinedPhone = '3992222222'
     * def randomEmail = function(){ return 'test_' + java.lang.System.currentTimeMillis() + '@wompi.com' }
-    * def sleep = function(seconds){ java.lang.Thread.sleep(seconds * 1000) }
